@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.example.game.enums.Direction;
 import org.example.game.core.Entity;
 import org.example.game.enums.NpcType;
+import org.example.game.logic.Attack;
 import org.example.game.logic.Movement;
 
 import java.util.UUID;
@@ -36,13 +37,7 @@ public class Npc implements Entity {
     }
 
     public void attack(Entity target) {
-
-        // logika algoritam
-        if (target.isDefending()) {
-            target.takeDamage(3);
-        } else {
-            target.takeDamage(7);
-        }
+        Attack.performAttack(this, target);
     }
 
     public void defend() {

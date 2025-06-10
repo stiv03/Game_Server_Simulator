@@ -38,7 +38,7 @@ public class JpaConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
         factoryBean.setDataSource(dataSource());
-        factoryBean.setPackagesToScan("org.example.entity");
+        factoryBean.setPackagesToScan("org.example.persistence.entity");
         factoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
         Properties properties = new Properties();
