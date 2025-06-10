@@ -44,13 +44,13 @@ public class Npc implements Entity {
         defending = true;
     }
 
-    public void takeDamage(int amount) {
-        if (!defending) {
-            health -= amount;
-        } else {
-            health -= amount / 2;
-        }
-        if (health < 0) health = 0;
+    public synchronized void takeDamage(int amount) {
+//        if (!defending) {
+//            health -= amount;
+//        } else {
+//            health -= amount / 2;
+//        }
+//        if (health < 0) health = 0;
     }
 
     public boolean isAlive() {

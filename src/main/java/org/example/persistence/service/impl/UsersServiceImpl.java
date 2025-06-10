@@ -100,7 +100,6 @@ public class UsersServiceImpl implements UsersService {
         logger.info(LogMessages.UPDATING_USER, id);
 
         Users userToUpdate = getUser(id);
-        Users currentUser = getLoggedInUser();
 
         OptionalSetter.consumeIfPresent(Optional.ofNullable(request.email()), userToUpdate::setEmail);
         OptionalSetter.consumeIfPresent(Optional.ofNullable(request.username()), userToUpdate::setUsername);
@@ -112,6 +111,16 @@ public class UsersServiceImpl implements UsersService {
         logger.info(LogMessages.UPDATED_USER, id, updated);
 
         return ResponseEntity.ok(UserMapper.toUserDto(updated));
+    }
+
+    @Override
+    public void levelUpUser(UUID userId) {
+        Users user = getUser(userId);
+        user.setLevel(user.getLevel() + 1);
+
+        logger.info(LogMessages.USER_LEVEL_UP, userId, user.getLevel());
+
+        usersRepository.update(user);
     }
 
 

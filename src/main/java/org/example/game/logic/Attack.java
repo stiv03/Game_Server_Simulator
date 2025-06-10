@@ -3,7 +3,6 @@ package org.example.game.logic;
 import org.example.config.messages.LogMessages;
 import org.example.exceptions.UnknownAttackerType;
 import org.example.game.core.Entity;
-import org.example.game.enums.NpcType;
 import org.example.game.model.Npc;
 import org.example.game.model.Player;
 import org.example.game.model.Position;
@@ -32,7 +31,12 @@ public class Attack {
 
         damage = applyDefenseReduction(target, damage);
 
+        if (attacker instanceof Player player) {
+            player.gainXp(damage);
+        }
+
         target.takeDamage(damage);
+
         logger.info(LogMessages.ATTACK_LOG, attacker.getName(), target.getName(), damage);
     }
 
@@ -54,60 +58,43 @@ public class Attack {
         int level = attacker.getUser().getLevel();
         int baseDamage = PLAYER_BASE_DAMAGE + level;
 
-        if (isNotInAttackRange(attacker, target)) {
-            return -1;
+        int damage = getEffectiveDamage(attacker, target, baseDamage, PLAYER_MAH_RANGE);
+        if (damage == -1) return -1;
+
+        if (attacker.isDoubleDamage()) {
+            damage *= 2;
         }
 
-        int distance = calculateDistance(attacker.getPosition(), target.getPosition());
-
-        double distanceFactor = calculateDistanceFactor(distance, 0.1, 0.5);
-        return (int) (baseDamage * distanceFactor);
+        return damage;
     }
 
 
     private static int calculateNpcDamage(Npc attacker, Entity target) {
+        int maxRange = switch (attacker.getType()) {
+            case ATTACKER -> ATTACKER_MAH_RANGE;
+            case GUARD -> GUARD_MAH_RANGE;
+        };
 
-        if (isNotInAttackRange(attacker, target)) {
+        return getEffectiveDamage(attacker, target, NPC_BASE_DAMAGE, maxRange);
+    }
+
+    private static int getEffectiveDamage(Entity attacker, Entity target, int baseDamage, int maxRange) {
+        int distance = calculateDistance(attacker.getPosition(), target.getPosition());
+
+        if (distance > maxRange) {
             return -1;
         }
 
-        int distance = calculateDistance(attacker.getPosition(), target.getPosition());
-        double distanceFactor = calculateDistanceFactor(distance, 0.05, 0.7);
-
-        return (int) (NPC_BASE_DAMAGE * distanceFactor);
+        double distanceFactor = calculateDistanceFactor(distance);
+        return (int) (baseDamage * distanceFactor);
     }
+
 
     private static int applyDefenseReduction(Entity target, int damage) {
         if (target.isDefending()) {
             return (int) (damage * DEFENSE_DAMAGE_REDUCTION_FACTOR);
         }
         return damage;
-    }
-
-
-    private static boolean isNotInAttackRange(Entity attacker, Entity target) {
-        int distance = calculateDistance(attacker.getPosition(), target.getPosition());
-
-        if (attacker instanceof Player player) {
-            if (distance > PLAYER_MAH_RANGE) {
-                logger.info(LogMessages.PLAYER_TOO_FAR, player.getName());
-                return true;
-            }
-        } else if (attacker instanceof Npc npc) {
-            NpcType type = npc.getType();
-
-            if (type == NpcType.ATTACKER && distance > ATTACKER_MAH_RANGE) {
-                logger.info(LogMessages.ATTACKER_TOO_FAR, npc.getName());
-                return true;
-            }
-
-            if (type == NpcType.GUARD && distance > GUARD_MAH_RANGE) {
-                logger.info(LogMessages.GUARD_IGNORES);
-                return true;
-            }
-        }
-
-        return false;
     }
 
 
@@ -118,7 +105,7 @@ public class Attack {
     }
 
 
-    private static double calculateDistanceFactor(int distance, double multiplier, double minFactor) {
-        return Math.max(1.0 - (distance * multiplier), minFactor);
+    private static double calculateDistanceFactor(int distance) {
+        return Math.max(1.0 - (distance * 0.1), 0.5);
     }
 }

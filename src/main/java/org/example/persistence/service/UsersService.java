@@ -25,4 +25,6 @@ public interface UsersService {
     ResponseEntity<Void> deleteUser(UUID id);
 
     ResponseEntity<UserDto> updateUser(UUID id, UpdateUserRequestDto request);
+
+    void levelUpUser(UUID userId);
 }
