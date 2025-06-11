@@ -1,4 +1,4 @@
-package org.example.mapper;
+package org.example.persistence.mapper;
 
 import org.example.config.messages.LogMessages;
 

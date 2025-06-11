@@ -1,11 +1,10 @@
 package org.example.game.logic;
 
 import org.example.config.messages.LogMessages;
-import org.example.exceptions.UnknownAttackerType;
-import org.example.game.core.Entity;
+import org.example.exceptions.UnknownEntityType;
+import org.example.game.model.Entity;
 import org.example.game.model.Npc;
 import org.example.game.model.Player;
-import org.example.game.model.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,7 @@ public class Attack {
 
     private static final Logger logger = LoggerFactory.getLogger(Attack.class);
 
-    public static void performAttack(Entity attacker, Entity target) {
+    public static void hitTarget(Entity attacker, Entity target) throws InterruptedException {
         if (!target.isAlive()) return;
 
         int damage = resolveDamage(attacker, target);
@@ -49,7 +48,7 @@ public class Attack {
             return calculatePlayerDamage(player, target);
 
         } else {
-            throw new UnknownAttackerType(attacker.getClass().getSimpleName());
+            throw new UnknownEntityType(attacker.getClass().getSimpleName());
         }
     }
 
@@ -79,7 +78,7 @@ public class Attack {
     }
 
     private static int getEffectiveDamage(Entity attacker, Entity target, int baseDamage, int maxRange) {
-        int distance = calculateDistance(attacker.getPosition(), target.getPosition());
+        int distance = Distance.calculateDistance(attacker.getPosition(), target.getPosition());
 
         if (distance > maxRange) {
             return -1;
@@ -96,14 +95,6 @@ public class Attack {
         }
         return damage;
     }
-
-
-    private static int calculateDistance(Position attacker, Position target) {
-        int dx = attacker.getX() - target.getX();
-        int dy = attacker.getY() - target.getY();
-        return (int) Math.sqrt(dx * dx + dy * dy);
-    }
-
 
     private static double calculateDistanceFactor(int distance) {
         return Math.max(1.0 - (distance * 0.1), 0.5);

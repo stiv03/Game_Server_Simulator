@@ -1,6 +1,5 @@
-package org.example.game.core;
+package org.example.game.model;
 
-import org.example.game.model.Position;
 import org.example.game.enums.Direction;
 
 
@@ -14,17 +13,21 @@ public interface Entity {
 
     void setPosition(Position position);
 
-    void move(Direction direction);
+    void setHealth(int health);
 
-    void attack(Entity target);
+    void move(Direction direction) throws InterruptedException;
+
+    void attack(Entity target) throws InterruptedException;
 
     void defend();
 
     int getHealth();
 
-    void takeDamage(int amount);
+    void takeDamage(int amount) throws InterruptedException;
 
     boolean isAlive();
 
     boolean isDefending();
+
+    void onDeath();
 }

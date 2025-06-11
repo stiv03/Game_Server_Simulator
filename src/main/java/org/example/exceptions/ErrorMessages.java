@@ -5,7 +5,7 @@ import java.text.MessageFormat;
 public class ErrorMessages {
 
     public static final String MISSING_ENVIRONMENT_VARIABLE = "Required Environment variable {0} was not found.";
-    public static final String UNKNOWN_ATTACKER_TYPE = "Unknown attacker type: {0}";
+    public static final String UNKNOWN_ENTITY_TYPE = "Unknown entity type: {0}";
 
     public static final String MISSING_EMAIL = "Email is required.";
     public static final String MISSING_USERNAME = "Username is required.";

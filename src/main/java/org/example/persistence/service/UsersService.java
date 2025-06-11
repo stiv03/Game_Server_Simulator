@@ -2,9 +2,9 @@ package org.example.persistence.service;
 
 
 
-import org.example.dto.request.RegisterUserRequestDto;
-import org.example.dto.request.UpdateUserRequestDto;
-import org.example.dto.UserDto;
+import org.example.persistence.dto.request.RegisterUserRequestDto;
+import org.example.persistence.dto.request.UpdateUserRequestDto;
+import org.example.persistence.dto.UserDto;
 
 import org.example.persistence.entity.Users;
 import org.springframework.http.ResponseEntity;

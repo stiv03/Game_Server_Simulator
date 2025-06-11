@@ -27,12 +27,12 @@ public class Item {
         synchronized (this) {
             if (!consumed && player.getPosition().equals(position)) {
                 logger.info(LogMessages.LOG_ITEM_PICKED, player.getName(), effect, position.getX(), position.getY());
-                applyEffect(player);
+                applyItemEffect(player);
             }
         }
     }
 
-    private void applyEffect(Player player) {
+    private void applyItemEffect(Player player) {
 
         switch (effect) {
             case HEALTH_RECOVERY -> {

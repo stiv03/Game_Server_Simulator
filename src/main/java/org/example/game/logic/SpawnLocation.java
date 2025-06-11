@@ -2,18 +2,18 @@ package org.example.game.logic;
 
 import org.example.game.model.Position;
 
-import java.util.Random;
+
+import org.example.game.model.GameMap;
 
 public class SpawnLocation {
 
-    private static final int MAX_X = 100;
-    private static final int MAX_Y = 100;
+    private final GameMap gameMap;
 
-    private static final Random random = new Random();
+    public SpawnLocation(GameMap gameMap) {
+        this.gameMap = gameMap;
+    }
 
-    public static Position getRandomSpawnPosition() {
-        int x = random.nextInt(MAX_X);
-        int y = random.nextInt(MAX_Y);
-        return new Position(x, y);
+    public Position getValidSpawnPosition() {
+        return gameMap.getRandomEmptyPosition();
     }
 }

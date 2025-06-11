@@ -4,10 +4,11 @@ package org.example.game.model;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.game.enums.Direction;
-import org.example.game.core.Entity;
 import org.example.game.enums.NpcType;
-import org.example.game.logic.Attack;
-import org.example.game.logic.Movement;
+import org.example.game.event.AttackEvent;
+import org.example.game.event.DamageEvent;
+import org.example.game.event.MoveEvent;
+import org.example.persistence.entity.GameSession;
 
 import java.util.UUID;
 
@@ -25,19 +26,22 @@ public class Npc implements Entity {
     @Getter
     private boolean defending = false;
 
-    public Npc(NpcType type, Position position) {
+    private final GameSession session;
+
+    public Npc(NpcType type, Position position,GameSession session) {
         this.type = type;
         this.position = position;
         name = type.toString().toLowerCase() + id;
+        this.session = session;
     }
 
-    public void move(Direction direction) {
-        // logika algoritam movement?
-        this.position = Movement.getNewPosition(this.position, direction);
+    public void move(Direction direction){
+        session.getEventQueue().offer(new MoveEvent(this, direction));
+
     }
 
     public void attack(Entity target) {
-        Attack.performAttack(this, target);
+        session.getEventQueue().offer(new AttackEvent(this, target));
     }
 
     public void defend() {
@@ -45,12 +49,12 @@ public class Npc implements Entity {
     }
 
     public synchronized void takeDamage(int amount) {
-//        if (!defending) {
-//            health -= amount;
-//        } else {
-//            health -= amount / 2;
-//        }
-//        if (health < 0) health = 0;
+        session.getEventQueue().offer(new DamageEvent(this, amount));
+    }
+
+    public void onDeath() {
+
+        //GAME OVER
     }
 
     public boolean isAlive() {

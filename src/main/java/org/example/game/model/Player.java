@@ -3,11 +3,12 @@ package org.example.game.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.example.game.logic.Attack;
-import org.example.game.logic.Movement;
+import org.example.game.event.AttackEvent;
+import org.example.game.event.DamageEvent;
+import org.example.game.event.MoveEvent;
+import org.example.persistence.entity.GameSession;
 import org.example.persistence.entity.Users;
 import org.example.game.enums.Direction;
-import org.example.game.core.Entity;
 import org.example.persistence.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -34,10 +35,12 @@ public class Player implements Entity {
     private long speedBoostEndTime = 0;
 
     private final UsersService userService;
+    private final GameSession session;
 
     @Autowired
-    public Player(UsersService usersService) {
+    public Player(UsersService usersService,GameSession session) {
         this.userService = usersService;
+        this.session = session;
     }
 
     public String getId() {
@@ -48,30 +51,38 @@ public class Player implements Entity {
         return user.getUsername();
     }
 
-    public void move(Direction direction) {
-        this.position = Movement.getNewPosition(this.position, direction);
+    public void move(Direction direction)  {
+        refreshEffects();
+        session.getEventQueue().offer(new MoveEvent(this, direction));
 
         if (speedBoost) {
-            this.position = Movement.getNewPosition(this.position, direction);
+            session.getEventQueue().offer(new MoveEvent(this, direction));
         }
     }
 
     public void attack(Entity target) {
-        Attack.performAttack(this, target);
+        refreshEffects();
+        session.getEventQueue().offer(new AttackEvent(this, target));
     }
 
     public void defend() {
         defending = true;
     }
 
-    public synchronized void takeDamage(int amount) {
-
-        // add logic
+    public synchronized void takeDamage(int amount)  {
+        refreshEffects();
+        session.getEventQueue().offer(new DamageEvent(this, amount));
     }
 
     public synchronized boolean isAlive() {
         return health > 0;
     }
+
+    public void onDeath() {
+        //GAME OVER
+        // disconnect
+    }
+
 
     public void gainXp(int amount) {
         xp += amount;

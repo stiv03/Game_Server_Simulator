@@ -3,7 +3,7 @@ package org.example.game.logic;
 import org.example.game.enums.Direction;
 import org.example.game.model.Position;
 
-public class Movement {
+public class Move {
 
     private static final int MIN_BOUND = 0;
     private static final int MAX_BOUND = 99;

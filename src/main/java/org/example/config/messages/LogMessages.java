@@ -27,4 +27,7 @@ public class LogMessages {
     public static final String LOG_INVINCIBILITY = "Player {} became INVINCIBLE";
     public static final String LOG_SPEED_BOOST = "Player {} gained SPEED_BOOST";
     public static final String LOG_ITEM_CONSUMED = "Item at position ({}, {}) has been consumed.";
+
+
+    public static final String SPAWNED_NPC = "Spawned NPC ({}) at {}";
 }
