@@ -12,6 +12,7 @@ public class ErrorMessages {
     public static final String MISSING_PASSWORD = "Password is required.";
 
     public static final String INVALID_CREDENTIALS = "Invalid username or password.";
+    public static final String INVALID_SESSION = "Invalid Session";
     public static final String USER_ALREADY_EXIST = "A user with this credential: {0} already exists.";
 
     public static final String LOG_CONFIG_ERROR = "Error loading config file";

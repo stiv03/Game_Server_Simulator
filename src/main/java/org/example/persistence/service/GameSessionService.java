@@ -1,5 +1,6 @@
 package org.example.persistence.service;
 
+import org.example.game.model.Entity;
 import org.example.persistence.dto.GameSessionDto;
 import org.example.persistence.dto.request.CreateGameSessionRequestDto;
 import org.example.persistence.entity.GameSession;
@@ -22,4 +23,6 @@ public interface GameSessionService {
     Optional<GameSessionDto> joinSession(UUID sessionId, Users user);
 
     Optional<GameSession> leaveSession(UUID sessionId, Users user);
+
+    List<Entity> getRanking(UUID sessionId);
 }

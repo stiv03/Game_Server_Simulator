@@ -3,28 +3,33 @@ package org.example.game.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.example.game.event.AttackEvent;
-import org.example.game.event.DamageEvent;
-import org.example.game.event.MoveEvent;
+import org.example.game.commands.Command;
 import org.example.persistence.entity.GameSession;
 import org.example.persistence.entity.Users;
-import org.example.game.enums.Direction;
-import org.example.persistence.service.UsersService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 @Getter
 @Setter
-public class Player implements Entity {
+public class Player implements Entity, Runnable {
 
-    private static final int MAH_HEALTH = 100;
-    private static final int XP_NEEDED_TO_LEVEL_UP = 100;
+    private static final Logger logger = LoggerFactory.getLogger(Player.class);
+
+    private static final int MAX_HEALTH = 100;
 
     private Users user;
     private Position position;
-    private int health = MAH_HEALTH;
+
+    private final GameSession session;
+
+    private int health = MAX_HEALTH;
 
     private int xp;
+    private boolean idDead;
     private boolean defending;
     private boolean doubleDamage;
     private boolean invincible;
@@ -34,81 +39,48 @@ public class Player implements Entity {
     private long invincibilityEndTime = 0;
     private long speedBoostEndTime = 0;
 
-    private final UsersService userService;
-    private final GameSession session;
+    private volatile boolean running = true;
 
-    @Autowired
-    public Player(UsersService usersService,GameSession session) {
-        this.userService = usersService;
+    private final BlockingQueue<Command> commandQueue = new LinkedBlockingQueue<>();
+
+    public Player(Users user, Position position, GameSession session) {
+        this.user = user;
+        this.position = position;
         this.session = session;
     }
 
-    public String getId() {
-        return user.getId().toString();
+    public UUID getId() {
+        return user.getId();
     }
 
     public String getName() {
         return user.getUsername();
     }
 
-    public void move(Direction direction)  {
-        refreshEffects();
-        session.getEventQueue().offer(new MoveEvent(this, direction));
-
-        if (speedBoost) {
-            session.getEventQueue().offer(new MoveEvent(this, direction));
-        }
-    }
-
-    public void attack(Entity target) {
-        refreshEffects();
-        session.getEventQueue().offer(new AttackEvent(this, target));
-    }
-
-    public void defend() {
-        defending = true;
-    }
-
-    public synchronized void takeDamage(int amount)  {
-        refreshEffects();
-        session.getEventQueue().offer(new DamageEvent(this, amount));
-    }
-
-    public synchronized boolean isAlive() {
+    @Override
+    public boolean isAlive() {
         return health > 0;
     }
 
-    public void onDeath() {
-        //GAME OVER
-        // disconnect
+    @Override
+    public void run() {
+        while (running) {
+            try {
+                Command command = commandQueue.take();
+                command.execute(this);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+            }
+        }
+        logger.info("USER Thread is killleddddd");
     }
 
-
-    public void gainXp(int amount) {
-        xp += amount;
-        if (xp >= XP_NEEDED_TO_LEVEL_UP) {
-            levelUp();
-        }
-    }
-
-    private void levelUp() {
-        userService.levelUpUser(user.getId());
-        xp = 0;
-    }
-
-    private void refreshEffects() {
-        long now = System.currentTimeMillis();
-
-        if (doubleDamage && now > doubleDamageEndTime) {
-            doubleDamage = false;
-        }
-
-        if (invincible && now > invincibilityEndTime) {
-            invincible = false;
-        }
-
-        if (speedBoost && now > speedBoostEndTime) {
-            speedBoost = false;
-        }
+    @Override
+    public void disconnect() {
+        this.running = false;
+        commandQueue.offer(command -> {
+        });
     }
 }

@@ -1,6 +1,7 @@
 package org.example.persistence.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.game.model.Entity;
 import org.example.persistence.dto.GameSessionDto;
 import org.example.persistence.dto.request.CreateGameSessionRequestDto;
 import org.example.persistence.mapper.GameSessionMapper;
@@ -62,5 +63,16 @@ public class GameSessionController {
                 .flatMap(u -> gameSessionService.leaveSession(id, u)
                         .map(session -> ResponseEntity.ok(GameSessionMapper.toGameSessionDto(session))))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping(ApiRoutes.GameSessionApiRoutes.STOP)
+    public ResponseEntity<Void> stopSession(@PathVariable UUID id) {
+        gameSessionService.endSession(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(ApiRoutes.GameSessionApiRoutes.RANKING)
+    public ResponseEntity<List<Entity>> getRanking(@PathVariable UUID id) {
+        return ResponseEntity.ok(gameSessionService.getRanking(id));
     }
 }

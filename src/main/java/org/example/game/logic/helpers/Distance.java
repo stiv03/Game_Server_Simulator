@@ -1,4 +1,4 @@
-package org.example.game.logic;
+package org.example.game.logic.helpers;
 
 import org.example.game.model.Position;
 

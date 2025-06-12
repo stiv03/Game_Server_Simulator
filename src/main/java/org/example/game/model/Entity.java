@@ -1,33 +1,26 @@
 package org.example.game.model;
 
-import org.example.game.enums.Direction;
+import java.util.UUID;
 
 
 public interface Entity {
 
-    String getId();
+    UUID getId();
 
     String getName();
 
     Position getPosition();
 
-    void setPosition(Position position);
+    void setPosition(Position newPosition);
 
-    void setHealth(int health);
-
-    void move(Direction direction) throws InterruptedException;
-
-    void attack(Entity target) throws InterruptedException;
-
-    void defend();
+    void setHealth(int newHealth);
 
     int getHealth();
-
-    void takeDamage(int amount) throws InterruptedException;
 
     boolean isAlive();
 
     boolean isDefending();
 
-    void onDeath();
+    void disconnect();
 }
+

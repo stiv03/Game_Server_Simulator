@@ -1,21 +1,24 @@
 package org.example.game.logic.npcAutomations;
 
 import org.example.game.enums.Direction;
-import org.example.game.logic.Distance;
+import org.example.game.logic.helpers.Distance;
 import org.example.game.model.Npc;
 import org.example.game.model.Player;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.example.game.service.NpcService;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Random;
 
 public class NpcMove {
+
+    private final NpcService npcService;
+
     private static final Random random = new Random();
-    private static final Logger logger = LoggerFactory.getLogger(NpcMove.class);
 
-
-    public static void moveNpc(Npc npc, List<Player> players) {
+    public NpcMove(NpcService npcService) {
+        this.npcService = npcService;
+    }
+    public  void moveNpc(Npc npc, Collection<Player> players) throws InterruptedException {
         switch (npc.getType()) {
             case ATTACKER -> {
                 Player closest = findClosestPlayer(npc, players);
@@ -27,7 +30,7 @@ public class NpcMove {
         }
     }
 
-    private static void chasePlayer(Npc npc, Player target)  {
+    private void chasePlayer(Npc npc, Player target) throws InterruptedException {
         int dx = target.getPosition().getX() - npc.getPosition().getX();
         int dy = target.getPosition().getY() - npc.getPosition().getY();
 
@@ -38,16 +41,16 @@ public class NpcMove {
             dir = dy > 0 ? Direction.DOWN : Direction.UP;
         }
 
-        npc.move(dir);
+        npcService.move(npc.getId(), dir);
     }
 
-    private static void moveRandomly(Npc npc)  {
+    private void moveRandomly(Npc npc) throws InterruptedException {
         Direction[] directions = Direction.values();
         Direction randomDir = directions[random.nextInt(directions.length)];
-        npc.move(randomDir);
+        npcService.move(npc.getId(), randomDir);
     }
 
-    private static Player findClosestPlayer(Npc npc, List<Player> players) {
+    private static Player findClosestPlayer(Npc npc, Collection<Player> players) {
         Player closest = null;
         int minDistance = Integer.MAX_VALUE;
 

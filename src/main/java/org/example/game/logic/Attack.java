@@ -1,13 +1,17 @@
 package org.example.game.logic;
 
-import org.example.config.messages.LogMessages;
 import org.example.exceptions.UnknownEntityType;
+import org.example.game.logic.helpers.Distance;
 import org.example.game.model.Entity;
 import org.example.game.model.Npc;
 import org.example.game.model.Player;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.example.game.service.NpcService;
+import org.example.game.service.PlayerService;
+import org.example.game.service.serviceIml.PlayerServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class Attack {
 
     private final static int PLAYER_BASE_DAMAGE = 5;
@@ -19,10 +23,17 @@ public class Attack {
 
     private static final double DEFENSE_DAMAGE_REDUCTION_FACTOR = 0.5;
 
+    private final PlayerService playerService;
+    private final NpcService npcService;
 
-    private static final Logger logger = LoggerFactory.getLogger(Attack.class);
+    @Autowired
+    public Attack(PlayerServiceImpl playerService, NpcService npcService) {
+        this.playerService = playerService;
+        this.npcService = npcService;
+    }
 
-    public static void hitTarget(Entity attacker, Entity target) throws InterruptedException {
+
+    public void hitTarget(Entity attacker, Entity target) throws InterruptedException {
         if (!target.isAlive()) return;
 
         int damage = resolveDamage(attacker, target);
@@ -31,12 +42,15 @@ public class Attack {
         damage = applyDefenseReduction(target, damage);
 
         if (attacker instanceof Player player) {
-            player.gainXp(damage);
+            playerService.gainXp(player.getId(), damage);
         }
 
-        target.takeDamage(damage);
+        if (target instanceof Player player) {
+            playerService.takeDamage(player.getId(), damage);
 
-        logger.info(LogMessages.ATTACK_LOG, attacker.getName(), target.getName(), damage);
+        } else if (target instanceof Npc npc) {
+            npcService.takeDamage(npc.getId(), damage);
+        }
     }
 
 

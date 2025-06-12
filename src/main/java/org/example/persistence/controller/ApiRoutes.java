@@ -18,5 +18,10 @@ public class ApiRoutes {
         public static final String RUNNING = "/running";
         public static final String JOIN = "/{id}/join";
         public static final String LEAVE = "/{id}/leave";
+
+        public static final String RANKING = "/{id}/ranking";
+        public static final String STOP = "/{id}/stop";
+
+
     }
 }

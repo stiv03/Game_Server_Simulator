@@ -12,9 +12,8 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Transient;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.example.game.event.GameEvent;
+import org.example.game.model.GameMap;
 import org.example.persistence.entity.enums.GameDifficulty;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -22,8 +21,6 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 @Entity
 @Data
@@ -58,8 +55,7 @@ public class GameSession {
     )
     private Set<Users> participants = new HashSet<>();
 
-    @Getter
     @Transient
-    private final BlockingQueue<GameEvent> eventQueue = new LinkedBlockingQueue<>();
+    private GameMap gameMap = new GameMap();
 
 }

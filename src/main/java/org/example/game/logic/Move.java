@@ -2,7 +2,10 @@ package org.example.game.logic;
 
 import org.example.game.enums.Direction;
 import org.example.game.model.Position;
+import org.springframework.stereotype.Component;
 
+
+@Component
 public class Move {
 
     private static final int MIN_BOUND = 0;

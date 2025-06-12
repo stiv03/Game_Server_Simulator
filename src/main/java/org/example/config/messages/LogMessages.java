@@ -29,5 +29,22 @@ public class LogMessages {
     public static final String LOG_ITEM_CONSUMED = "Item at position ({}, {}) has been consumed.";
 
 
-    public static final String SPAWNED_NPC = "Spawned NPC ({}) at {}";
+    public static final String STARTING_SESSION = "Starting game session {}";
+    public static final String PLAYER_JOIN = "Player {} joined session {}, at position {}";
+    public static final String RANKING = "=== Ranking for session [{}] ===";
+    public static final String ENTITY_RANKING = "#{} -> Name: {}, Health: {}";
+
+    public static final String DISCONNECT_SESSION = "Player {} removed from session {}";
+    public static final String PLAYER_NOT_IN_SESSION = "Tried to remove player {}, but not found in session {}";
+
+    public static final String START_GAME_SESSION = "Game session {} started in new thread";
+    public static final String INTERRUPTED_GAME_SESSION = "Game session thread interrupted for session {}";
+    public static final String STOPPED_GAME_SESSION = "Game session {} stopped";
+    public static final String STOP_ALL_ENTITIES_IN_SESSION = "All entities stopped in session {}";
+
+    public static final String MOVE_TO = "{} moved {} to {}";
+    public static final String DAMAGE_TAKEN = "{} took {} damage.";
+
+    public static final String SPAWNED_NPC = "Spawning NPC at position {} in session {}";
+    public static final String DROPPED_ITEM = "Item {} was dropper at position {} in session {}";
 }

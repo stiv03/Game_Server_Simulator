@@ -1,17 +1,24 @@
 package org.example.game.logic.npcAutomations;
 
-import org.example.game.logic.Distance;
+import org.example.game.logic.helpers.Distance;
 import org.example.game.model.Npc;
 import org.example.game.model.Player;
+import org.example.game.service.NpcService;
 
-import java.util.List;
+import java.util.Collection;
 
 public class NpcAttack {
 
     private final static int ATTACKER_RANGE = 10;
     private final static int GUARD_RANGE = 2;
 
-    public static void tryAttack(Npc npc, List<Player> players) {
+    private final NpcService npcService;
+
+    public NpcAttack(NpcService npcService) {
+        this.npcService = npcService;
+    }
+
+    public  void tryAttack(Npc npc, Collection<Player> players) throws InterruptedException {
         for (Player player : players) {
             if (!player.isAlive()) continue;
 
@@ -23,7 +30,7 @@ public class NpcAttack {
             };
 
             if (distance <= attackRange) {
-                npc.attack(player);
+                npcService.attack(npc.getId(), player);
                 return;
             }
         }
