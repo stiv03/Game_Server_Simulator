@@ -29,7 +29,6 @@ public class MoveCommand implements Command {
         logger.info(LogMessages.MOVE_TO, entity.getName(), direction, newPosition);
 
         if (entity instanceof Player player) {
-            logger.debug("Player {} stepped on {}, checking for item pickup", player.getName(), player.getPosition());
             context.pickUpItem(player);
         }
     }

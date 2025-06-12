@@ -147,7 +147,6 @@ public class GameSessionContext implements Runnable {
     public void pickUpItem(Player player) {
         for (Item item : items) {
             if (!item.isConsumed() && item.getPosition().equals(player.getPosition())) {
-                logger.debug("Attempting to apply effect: {}", item.getEffect());
                 itemService.applyEffect(item, player);
                 item.setConsumed(true);
             }
