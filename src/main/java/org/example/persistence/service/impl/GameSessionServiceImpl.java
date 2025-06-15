@@ -2,10 +2,8 @@ package org.example.persistence.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.game.logic.gameSession.GameSessionContext;
+import org.example.game.gameDto.EntityDto;
 import org.example.game.logic.gameSession.GameSessionManager;
-import org.example.game.model.Entity;
-import org.example.game.model.GameMap;
 import org.example.game.model.Player;
 import org.example.game.service.PlayerService;
 import org.example.persistence.dto.GameSessionDto;
@@ -43,6 +41,8 @@ public class GameSessionServiceImpl implements GameSessionService {
 
         sessionManager.startSession(saved);
 
+        joinSession(session.getId(),session.getCreatedBy());
+
         return GameSessionMapper.toGameSessionDto(saved);
     }
 
@@ -57,6 +57,7 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
+    @Transactional
     public List<GameSessionDto> findAllRunningSessions() {
         return gameSessionRepository.findAllRunning()
                 .stream()
@@ -79,6 +80,7 @@ public class GameSessionServiceImpl implements GameSessionService {
             return Optional.empty();
         }
 
+        leaveActiveSession(sessionId, user);
 
         GameSession session = optionalSession.get();
 
@@ -104,16 +106,26 @@ public class GameSessionServiceImpl implements GameSessionService {
 
         GameSession session = optionalSession.get();
 
-
-        sessionManager.getContext(sessionId).removePlayer(user.getId());
+        sessionManager.getOrLoadContext(sessionId).removePlayer(user.getId());
 
         session.getParticipants().remove(user);
         return Optional.of(gameSessionRepository.update(session));
     }
 
+    @Override
+    public List<EntityDto> getRanking(UUID sessionId) {
+        return  sessionManager.getOrLoadContext(sessionId).getRanking().stream()
+                .map(entity -> new EntityDto(entity.getName())) .toList();
+    }
 
-    public List<Entity> getRanking(UUID sessionId) {
-        return sessionManager.getOrLoadContext(sessionId).getRanking();
+    private void leaveActiveSession(UUID sessionId, Users user) {
+        List<GameSession> activeSessions = gameSessionRepository.findAllRunning();
 
+        for (GameSession active : activeSessions) {
+            if (!active.getId().equals(sessionId) && active.getParticipants().contains(user)) {
+                leaveSession(active.getId(), user);
+                gameSessionRepository.update(active);
+            }
+        }
     }
 }

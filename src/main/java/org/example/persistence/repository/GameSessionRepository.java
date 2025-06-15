@@ -14,7 +14,7 @@ import java.util.UUID;
 public class GameSessionRepository {
 
     private static final String FIND_ALL_QUERY = "SELECT gs FROM GameSession gs";
-    private static final String FIND_ALL_RUNNING_QUERY = "SELECT gs FROM GameSession gs WHERE gs.endedAt IS NULL";
+    private static final String FIND_ALL_RUNNING_QUERY = "SELECT gs FROM GameSession gs WHERE gs.endTime IS NULL";
 
     @PersistenceContext
     private EntityManager entityManager;

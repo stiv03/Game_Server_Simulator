@@ -1,7 +1,7 @@
 package org.example.persistence.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.game.model.Entity;
+import org.example.game.gameDto.EntityDto;
 import org.example.persistence.dto.GameSessionDto;
 import org.example.persistence.dto.request.CreateGameSessionRequestDto;
 import org.example.persistence.mapper.GameSessionMapper;
@@ -72,7 +72,7 @@ public class GameSessionController {
     }
 
     @GetMapping(ApiRoutes.GameSessionApiRoutes.RANKING)
-    public ResponseEntity<List<Entity>> getRanking(@PathVariable UUID id) {
+    public ResponseEntity<List<EntityDto>> getRanking(@PathVariable UUID id) {
         return ResponseEntity.ok(gameSessionService.getRanking(id));
     }
 }

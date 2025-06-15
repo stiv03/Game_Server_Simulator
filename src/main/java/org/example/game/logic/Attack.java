@@ -7,12 +7,17 @@ import org.example.game.model.Npc;
 import org.example.game.model.Player;
 import org.example.game.service.NpcService;
 import org.example.game.service.PlayerService;
+
 import org.example.game.service.serviceIml.PlayerServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Attack {
+
+    private static final Logger logger = LoggerFactory.getLogger(Attack.class);
 
     private final static int PLAYER_BASE_DAMAGE = 5;
     private final static int NPC_BASE_DAMAGE = 10;
@@ -34,22 +39,32 @@ public class Attack {
 
 
     public void hitTarget(Entity attacker, Entity target) throws InterruptedException {
-        if (!target.isAlive()) return;
 
-        int damage = resolveDamage(attacker, target);
-        if (damage == -1) return;
-
-        damage = applyDefenseReduction(target, damage);
-
-        if (attacker instanceof Player player) {
-            playerService.gainXp(player.getId(), damage);
+        if (target == null) {
+            logger.warn("Cannot attack: target is null.");
+            return;
         }
 
-        if (target instanceof Player player) {
-            playerService.takeDamage(player.getId(), damage);
+        synchronized (target) {
 
-        } else if (target instanceof Npc npc) {
-            npcService.takeDamage(npc.getId(), damage);
+            if (!target.isAlive()){
+                logger.info("{} has been killed by {}", target.getName(), attacker.getName());
+            }
+
+            int damage = resolveDamage(attacker, target);
+            if (damage == -1) return;
+
+            damage = applyDefenseReduction(target, damage);
+
+            if (attacker instanceof Player player) {
+                playerService.gainXp(player.getId(), damage);
+            }
+
+            if (target instanceof Player player) {
+                playerService.takeDamage(player.getId(), damage);
+            } else if (target instanceof Npc npc) {
+                npcService.takeDamage(npc.getId(), damage);
+            }
         }
     }
 
@@ -104,11 +119,16 @@ public class Attack {
 
 
     private static int applyDefenseReduction(Entity target, int damage) {
-        if (target.isDefending()) {
-            return (int) (damage * DEFENSE_DAMAGE_REDUCTION_FACTOR);
+        if (target instanceof Player player) {
+            if (player.isDefending() && player.getDefendingEndTime() > System.currentTimeMillis()) {
+                return (int) (damage * DEFENSE_DAMAGE_REDUCTION_FACTOR);
+            } else {
+                player.setDefending(false);
+            }
         }
         return damage;
     }
+
 
     private static double calculateDistanceFactor(int distance) {
         return Math.max(1.0 - (distance * 0.1), 0.5);

@@ -20,7 +20,7 @@ public class GameSessionManager {
 
     public void startSession(GameSession session) {
         GameSessionContext context = contextProvider.getObject();
-        context.load(session.getId());
+        context.loadSession(session.getId());
         context.startSession();
 
         Thread thread = new Thread(context);
@@ -48,9 +48,8 @@ public class GameSessionManager {
     public GameSessionContext getOrLoadContext(UUID sessionId) {
         return contexts.computeIfAbsent(sessionId, id -> {
             GameSessionContext context = contextProvider.getObject();
-            context.load(id);
+            context.loadSession(id);
             return context;
         });
     }
-
 }

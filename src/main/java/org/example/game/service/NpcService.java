@@ -1,7 +1,6 @@
 package org.example.game.service;
 
 import org.example.game.enums.Direction;
-import org.example.game.model.Entity;
 import org.example.game.model.Npc;
 import org.example.persistence.entity.GameSession;
 
@@ -14,7 +13,7 @@ public interface NpcService extends EntityService{
 
     void move(UUID npcId, Direction direction) throws InterruptedException;
 
-    void attack(UUID npcId, Entity target) throws InterruptedException;
+    void attack(UUID npcId, UUID targetId) throws InterruptedException;
 
     void defend(UUID npcId);
 

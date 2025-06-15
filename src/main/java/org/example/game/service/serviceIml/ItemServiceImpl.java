@@ -25,7 +25,6 @@ public class ItemServiceImpl implements ItemService {
     private static final int EFFECT_DURATION_MILLIS = 30_000;
 
     public Item spawnItemsForSession(GameSession session) {
-
         GameMap map = session.getGameMap();
         Position droppedAtPosition = map.getRandomEmptyPosition();
         return new Item(droppedAtPosition, randomEffect());
@@ -33,36 +32,40 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void applyEffect(Item item, Player player) {
-        if (item.isConsumed() || !player.getPosition().equals(item.getPosition())) return;
+        synchronized (item) {
+            if (item.isConsumed() || !player.getPosition().equals(item.getPosition())) return;
 
-        logger.info(LogMessages.LOG_ITEM_PICKED, player.getName(), item.getEffect(),
-                item.getPosition().getX(), item.getPosition().getY());
+            logger.info(LogMessages.LOG_ITEM_PICKED, player.getName(), item.getEffect(),
+                    item.getPosition().getX(), item.getPosition().getY());
 
-        switch (item.getEffect()) {
-            case HEALTH_RECOVERY -> {
-                player.setHealth(Math.min(MAX_HEALTH, player.getHealth() + HEALTH_RECOVERY_POINTS));
-                logger.info(LogMessages.LOG_HEALTH_RECOVERY, player.getName());
+            synchronized (player) {
+                switch (item.getEffect()) {
+                    case HEALTH_RECOVERY -> {
+                        player.setHealth(Math.min(MAX_HEALTH, player.getHealth() + HEALTH_RECOVERY_POINTS));
+                        logger.info(LogMessages.LOG_HEALTH_RECOVERY, player.getName());
+                    }
+                    case DOUBLE_DAMAGE -> {
+                        player.setDoubleDamage(true);
+                        player.setDoubleDamageEndTime(System.currentTimeMillis() + EFFECT_DURATION_MILLIS);
+                        logger.info(LogMessages.LOG_DOUBLE_DAMAGE, player.getName());
+                    }
+                    case INVINCIBILITY -> {
+                        player.setInvincible(true);
+                        player.setInvincibilityEndTime(System.currentTimeMillis() + EFFECT_DURATION_MILLIS);
+                        logger.info(LogMessages.LOG_INVINCIBILITY, player.getName());
+                    }
+                    case SPEED_BOOST -> {
+                        player.setSpeedBoost(true);
+                        player.setSpeedBoostEndTime(System.currentTimeMillis() + EFFECT_DURATION_MILLIS);
+                        logger.info(LogMessages.LOG_SPEED_BOOST, player.getName());
+                    }
+                }
             }
-            case DOUBLE_DAMAGE -> {
-                player.setDoubleDamage(true);
-                player.setDoubleDamageEndTime(System.currentTimeMillis() + EFFECT_DURATION_MILLIS);
-                logger.info(LogMessages.LOG_DOUBLE_DAMAGE, player.getName());
-            }
-            case INVINCIBILITY -> {
-                player.setInvincible(true);
-                player.setInvincibilityEndTime(System.currentTimeMillis() + EFFECT_DURATION_MILLIS);
-                logger.info(LogMessages.LOG_INVINCIBILITY, player.getName());
-            }
-            case SPEED_BOOST -> {
-                player.setSpeedBoost(true);
-                player.setSpeedBoostEndTime(System.currentTimeMillis() + EFFECT_DURATION_MILLIS);
-                logger.info(LogMessages.LOG_SPEED_BOOST, player.getName());
-            }
+
+            item.setConsumed(true);
+            logger.debug(LogMessages.LOG_ITEM_CONSUMED,
+                    item.getPosition().getX(), item.getPosition().getY());
         }
-
-        item.setConsumed(true);
-        logger.debug(LogMessages.LOG_ITEM_CONSUMED,
-                item.getPosition().getX(), item.getPosition().getY());
     }
 
     private Effect randomEffect() {

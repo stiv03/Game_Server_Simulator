@@ -17,6 +17,5 @@ public class Item {
     public Item(Position position, Effect effect) {
         this.position = position;
         this.effect = effect;
-
     }
 }

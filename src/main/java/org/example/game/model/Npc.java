@@ -7,6 +7,8 @@ import org.example.game.enums.NpcType;
 import org.example.game.commands.Command;
 import org.example.game.logic.npcAutomations.NpcAiEngine;
 import org.example.persistence.entity.GameSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.util.UUID;
@@ -17,22 +19,29 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Setter
 public class Npc implements Entity,Runnable {
 
-    @JsonIgnore
-    private final NpcAiEngine npcAiEngine;
+    private static final Logger logger = LoggerFactory.getLogger(Npc.class);
+
+    private static final int MAX_NPC_HEALTH = 50;
 
     private final GameSession session;
 
     private final UUID id = UUID.randomUUID();
     private final String name;
     private final NpcType type;
+    private boolean idDead;
 
     private Position position;
-    private int health = 50;
+    private int health = MAX_NPC_HEALTH;
     private boolean defending = false;
 
     private volatile boolean running = true;
 
+    @JsonIgnore
+    private final NpcAiEngine npcAiEngine;
+
+    @JsonIgnore
     private final BlockingQueue<Command> commandQueue = new LinkedBlockingQueue<>();
+
 
     public Npc(NpcType type, Position position, GameSession session,NpcAiEngine npcAiEngine) {
         this.type = type;
@@ -60,7 +69,7 @@ public class Npc implements Entity,Runnable {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             } catch (Exception e) {
-                System.err.println("NPC error: " + e.getMessage());
+                System.err.println(e.getMessage());
             }
         }
     }

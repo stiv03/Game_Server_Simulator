@@ -1,6 +1,6 @@
 package org.example.game.service.serviceIml;
 
-
+import org.example.config.messages.LogMessages;
 import org.example.game.enums.Direction;
 import org.example.game.enums.NpcType;
 import org.example.game.commands.AttackCommand;
@@ -20,6 +20,8 @@ import org.example.game.model.Position;
 import org.example.game.service.NpcService;
 import org.example.game.service.PlayerService;
 import org.example.persistence.entity.GameSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class NpcServiceImpl implements NpcService {
+
+    private static final Logger logger = LoggerFactory.getLogger(NpcServiceImpl.class);
+    private static final int NORMAL_STEP = 1;
 
     @Autowired
     private GameSessionManager gameSessionManager;
@@ -74,21 +79,26 @@ public class NpcServiceImpl implements NpcService {
         synchronized (npc) {
 
             GameSessionContext context = gameSessionManager.getContext(npc.getSession().getId());
-            npc.getCommandQueue().add(new MoveCommand(direction, context));
+            npc.getCommandQueue().add(new MoveCommand(direction, context, NORMAL_STEP));
         }
     }
 
-
     @Override
-    public void attack(UUID npcId, Entity target) throws InterruptedException {
+    public void attack(UUID npcId, UUID targetId) throws InterruptedException {
         Npc npc = getNpc(npcId);
-        synchronized (target) {
-            npc.getCommandQueue().add(new AttackCommand(target, attack));
+
+        GameSessionContext context = gameSessionManager.getContext(npc.getSession().getId());
+
+        Entity target = context.getEntitiesMap().get(targetId);
+
+        if (target == null) {
+            logger.info(LogMessages.TARGET_LEFT_SESSION);
+            return;
         }
+        npc.getCommandQueue().add(new AttackCommand(target.getId(), attack, context));
     }
 
     @Override
-
     public void defend(UUID npcId) {
         Npc npc = getNpc(npcId);
         npc.setDefending(true);
@@ -107,7 +117,6 @@ public class NpcServiceImpl implements NpcService {
     public void onDeath(UUID npcId) {
         Npc npc = getNpc(npcId);
         npc.disconnect();
-        npcs.remove(npcId);
     }
 
     @Override
@@ -115,9 +124,8 @@ public class NpcServiceImpl implements NpcService {
         return npcs.values();
     }
 
-    public Npc getNpc(UUID id) {
+    private Npc getNpc(UUID id) {
         return npcs.get(id);
-
     }
 
     private NpcType getRandomNpcType() {

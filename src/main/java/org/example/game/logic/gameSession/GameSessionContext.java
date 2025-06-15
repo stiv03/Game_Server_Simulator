@@ -1,5 +1,6 @@
 package org.example.game.logic.gameSession;
 
+import lombok.Getter;
 import org.example.config.messages.LogMessages;
 import org.example.exceptions.SessionNotFoundException;
 import org.example.game.model.Entity;
@@ -18,11 +19,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 @Scope("prototype")
@@ -45,12 +47,11 @@ public class GameSessionContext implements Runnable {
 
     private final ItemService itemService;
 
-    private final Map<UUID, Thread> playerThreads = new HashMap<>();
-
     private final GameSessionRepository sessionRepository;
 
-    private final List<Entity> entities = new ArrayList<>();
-    private final List<Item> items = new ArrayList<>();
+    private final Map<UUID, Entity> entities = new ConcurrentHashMap<>();
+    @Getter
+    private final List<Item> items = Collections.synchronizedList(new ArrayList<>());
     private volatile boolean running = true;
 
 
@@ -60,19 +61,95 @@ public class GameSessionContext implements Runnable {
         this.itemService = itemService;
     }
 
-    public void load(UUID sessionId) {
+    @Override
+    public void run() {
+        logger.info(LogMessages.START_GAME_SESSION, session.getId());
+        while (running) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                logger.info(LogMessages.INTERRUPTED_GAME_SESSION, session.getId());
+            }
+        }
+        logger.info(LogMessages.STOPPED_GAME_SESSION, session.getId());
+    }
+
+    public void loadSession(UUID sessionId) {
         this.session = sessionRepository.findById(sessionId)
                 .orElseThrow(SessionNotFoundException::new);
     }
 
 
     public void startSession() {
-
         if (session == null) throw new SessionNotFoundException();
         logger.info(LogMessages.STARTING_SESSION, session.getId());
         spawnNpcsByDifficulty(session.getDifficulty());
         spawnItemByDifficulty(session.getDifficulty());
+    }
 
+
+
+    public void joinPlayer(Player player) {
+        entities.put(player.getId(), player);
+        logger.info(LogMessages.PLAYER_JOIN, player.getName(), session.getId(), player.getPosition().toString());
+    }
+
+    public List<Entity> getRanking() {
+        List<Entity> sortedRanking = entities.values().stream()
+                .sorted(Comparator.comparingInt(Entity::getHealth).reversed())
+                .toList();
+
+        logger.info(LogMessages.RANKING, session.getId());
+        for (int i = 0; i < sortedRanking.size(); i++) {
+            Entity e = sortedRanking.get(i);
+            logger.info(LogMessages.ENTITY_RANKING, i + 1, e.getName(), e.getHealth());
+        }
+
+        return sortedRanking;
+    }
+
+
+    public void removePlayer(UUID userId) {
+        Player toRemove = null;
+        for (Entity entity : entities.values()) {
+            if (entity instanceof Player player && player.getUser().getId().equals(userId)) {
+                toRemove = player;
+                break;
+            }
+        }
+
+        if (toRemove != null) {
+            toRemove.disconnect();
+            entities.remove(toRemove.getId());
+            logger.info(LogMessages.DISCONNECT_SESSION, toRemove.getName(), session.getId());
+        } else {
+            logger.warn(LogMessages.PLAYER_NOT_IN_SESSION, userId, session.getId());
+        }
+    }
+
+    public void pickUpItem(Player player) {
+        synchronized (items) {
+            for (Item item : items) {
+                if (!item.isConsumed() && item.getPosition().equals(player.getPosition())) {
+                    itemService.applyEffect(item, player);
+                    item.setConsumed(true);
+                }
+            }
+        }
+    }
+
+    public Map<UUID, Entity> getEntitiesMap() {
+        return entities;
+    }
+
+
+    public void stop() {
+        this.running = false;
+        for (Entity e : entities.values()) {
+            e.disconnect();
+        }
+        logger.info(LogMessages.STOP_ALL_ENTITIES_IN_SESSION, session.getId());
     }
 
     private void spawnNpcsByDifficulty(GameDifficulty difficulty) {
@@ -86,7 +163,7 @@ public class GameSessionContext implements Runnable {
             Npc npc = npcService.spawnNpc(session);
             logger.info(LogMessages.SPAWNED_NPC,
                     npc.getPosition().toString(), session.getId());
-            entities.add(npc);
+            entities.put(npc.getId(), npc);
         }
     }
 
@@ -102,80 +179,5 @@ public class GameSessionContext implements Runnable {
                     item.getPosition().toString(), session.getId());
             items.add(item);
         }
-    }
-
-
-    public void joinPlayer(Player player) {
-        entities.add(player);
-
-
-        logger.info(LogMessages.PLAYER_JOIN, player.getName(), session.getId(), player.getPosition().toString());
-    }
-
-    public List<Entity> getRanking() {
-        List<Entity> sorted = entities.stream()
-                .sorted(Comparator.comparingInt(Entity::getHealth).reversed())
-                .toList();
-
-        logger.info(LogMessages.RANKING, session.getId());
-        for (int i = 0; i < sorted.size(); i++) {
-            Entity e = sorted.get(i);
-            logger.info(LogMessages.ENTITY_RANKING, i + 1, e.getName(), e.getHealth());
-        }
-
-        return sorted;
-    }
-
-    public void removePlayer(UUID userId) {
-        Player toRemove = null;
-        for (Entity entity : entities) {
-            if (entity instanceof Player player && player.getUser().getId().equals(userId)) {
-                toRemove = player;
-                break;
-            }
-        }
-
-        if (toRemove != null) {
-            toRemove.disconnect();
-            entities.remove(toRemove);
-            logger.info(LogMessages.DISCONNECT_SESSION, toRemove.getName(), session.getId());
-        } else {
-            logger.warn(LogMessages.PLAYER_NOT_IN_SESSION, userId, session.getId());
-        }
-    }
-
-    public void pickUpItem(Player player) {
-        for (Item item : items) {
-            if (!item.isConsumed() && item.getPosition().equals(player.getPosition())) {
-                itemService.applyEffect(item, player);
-                item.setConsumed(true);
-            }
-        }
-    }
-
-
-    @Override
-    public void run() {
-        logger.info(LogMessages.START_GAME_SESSION, session.getId());
-        while (running) {
-            try {
-                Thread.sleep(1000);
-                //синхенонизирай тук потоците от плейъри и нпс
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                logger.info(LogMessages.INTERRUPTED_GAME_SESSION, session.getId());
-            }
-        }
-        logger.info(LogMessages.STOPPED_GAME_SESSION, session.getId());
-    }
-
-    public void stop() {
-        this.running = false;
-
-        for (Entity e : entities) {
-            e.disconnect();
-
-        }
-        logger.info(LogMessages.STOP_ALL_ENTITIES_IN_SESSION, session.getId());
     }
 }
