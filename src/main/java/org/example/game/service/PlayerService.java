@@ -1,7 +1,6 @@
 package org.example.game.service;
 
 import org.example.game.enums.Direction;
-import org.example.game.model.Entity;
 import org.example.game.model.Player;
 import org.example.persistence.entity.GameSession;
 import org.example.persistence.entity.Users;
@@ -15,9 +14,9 @@ public interface PlayerService extends EntityService {
 
     Player registerPlayer(Users user, GameSession session);
 
-    void move(UUID playerId, Direction direction) throws InterruptedException;
+    void move(UUID playerId, Direction direction);
 
-    void attack(UUID playerId, Entity target) throws InterruptedException;
+    void attack(UUID attackerId, UUID targetId);
 
     void defend(UUID playerId);
 

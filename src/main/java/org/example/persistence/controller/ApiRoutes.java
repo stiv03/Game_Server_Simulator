@@ -21,7 +21,5 @@ public class ApiRoutes {
 
         public static final String RANKING = "/{id}/ranking";
         public static final String STOP = "/{id}/stop";
-
-
     }
 }

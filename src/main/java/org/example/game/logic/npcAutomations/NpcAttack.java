@@ -18,7 +18,7 @@ public class NpcAttack {
         this.npcService = npcService;
     }
 
-    public  void tryAttack(Npc npc, Collection<Player> players) throws InterruptedException {
+    public void tryAttack(Npc npc, Collection<Player> players) throws InterruptedException {
         for (Player player : players) {
             if (!player.isAlive()) continue;
 
@@ -30,7 +30,7 @@ public class NpcAttack {
             };
 
             if (distance <= attackRange) {
-                npcService.attack(npc.getId(), player);
+                npcService.attack(npc.getId(), player.getId());
                 return;
             }
         }

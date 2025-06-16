@@ -1,5 +1,6 @@
 package org.example.game.service.serviceIml;
 
+import org.example.config.messages.LogMessages;
 import org.example.game.enums.Direction;
 import org.example.game.commands.AttackCommand;
 import org.example.game.commands.DamageCommand;
@@ -16,6 +17,8 @@ import org.example.game.service.PlayerService;
 import org.example.persistence.entity.GameSession;
 import org.example.persistence.entity.Users;
 import org.example.persistence.service.UsersService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -28,7 +31,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class PlayerServiceImpl implements PlayerService {
 
+    private static final Logger logger = LoggerFactory.getLogger(PlayerServiceImpl.class);
+
     private static final int XP_NEEDED_TO_LEVEL_UP = 100;
+    private static final int DEFENCE_DURATION_MILLIS = 30_000;
+    private static final int NORMAL_STEP = 1;
+    private static final int DOUBLE_STEP = 2;
 
     private final UsersService usersService;
     private final Attack attack;
@@ -52,6 +60,7 @@ public class PlayerServiceImpl implements PlayerService {
         return players.get(id);
     }
 
+
     @Override
     public Player registerPlayer(Users user, GameSession session) {
         GameMap map = session.getGameMap();
@@ -72,26 +81,34 @@ public class PlayerServiceImpl implements PlayerService {
         GameSessionContext context = gameSessionManager.getContext(player.getSession().getId());
 
         refreshEffects(player);
-        player.getCommandQueue().add(new MoveCommand(direction, context));
 
-        if (player.isSpeedBoost()) {
-            player.getCommandQueue().add(new MoveCommand(direction, context));
-        }
+        int steps = player.isSpeedBoost() ? DOUBLE_STEP : NORMAL_STEP;
+        player.getCommandQueue().add(new MoveCommand(direction, context, steps));
     }
 
 
     @Override
-    public void attack(UUID attackerId, Entity target) {
+    public void attack(UUID attackerId, UUID targetId) {
         Player attacker = getPlayer(attackerId);
-        refreshEffects(attacker);
-        attacker.getCommandQueue().add(new AttackCommand(target, attack));
-    }
 
+        GameSessionContext context = gameSessionManager.getContext(attacker.getSession().getId());
+
+        Entity target = context.getEntitiesMap().get(targetId);
+        if (target == null) {
+            logger.info(LogMessages.TARGET_LEFT_SESSION);
+            return;
+        }
+        refreshEffects(attacker);
+        attacker.getCommandQueue().add(new AttackCommand(target.getId(), attack, context));
+
+    }
 
     @Override
     public void defend(UUID playerId) {
         Player player = getPlayer(playerId);
+        logger.info(LogMessages.PLAYER_IS_DEFENDING, player.getName());
         player.setDefending(true);
+        player.setDefendingEndTime(System.currentTimeMillis() + DEFENCE_DURATION_MILLIS);
     }
 
     @Override
@@ -115,7 +132,6 @@ public class PlayerServiceImpl implements PlayerService {
     public void onDeath(UUID playerId) {
         Player player = getPlayer(playerId);
         player.disconnect();
-        players.remove(playerId);
     }
 
     private void levelUp(Player player) {

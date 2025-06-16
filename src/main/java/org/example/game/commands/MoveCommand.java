@@ -15,21 +15,26 @@ public class MoveCommand implements Command {
     private static final Logger logger = LoggerFactory.getLogger(MoveCommand.class);
 
     private final Direction direction;
-    private final GameSessionContext context;
+    private final GameSessionContext gameSessionContext;
 
-    public MoveCommand(Direction direction, GameSessionContext context) {
+    private final int steps;
+
+    public MoveCommand(Direction direction, GameSessionContext context,  int steps) {
         this.direction = direction;
-        this.context = context;
+        this.gameSessionContext = context;
+        this.steps = steps;
     }
 
     @Override
     public void execute(Entity entity) {
-        Position newPosition = Move.getNewPosition(entity.getPosition(), direction);
-        entity.setPosition(newPosition);
-        logger.info(LogMessages.MOVE_TO, entity.getName(), direction, newPosition);
+        for (int i = 0; i < steps; i++) {
+            Position newPosition = Move.getNewPosition(entity.getPosition(), direction);
+            entity.setPosition(newPosition);
+            logger.info(LogMessages.MOVE_TO, entity.getName(), direction, newPosition);
 
-        if (entity instanceof Player player) {
-            context.pickUpItem(player);
+            if (entity instanceof Player player) {
+                gameSessionContext.pickUpItem(player);
+            }
         }
     }
 }

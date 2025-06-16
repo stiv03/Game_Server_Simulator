@@ -6,7 +6,7 @@ public class LogMessages {
     public static final String DEPLOYING_WEBAPP = "Deploying webapp from: {}";
     public static final String ERROR_STARTING_TOMCAT = "Error starting Tomcat";
 
-    public static final String ATTACK_LOG = "{} attacked {} for {} damage";
+    public static final String ATTACK_LOG = "{} attacked {}";
 
     public static final String INVALID_DTO = "Invalid DTO:{} file is null";
 
@@ -47,4 +47,12 @@ public class LogMessages {
 
     public static final String SPAWNED_NPC = "Spawning NPC at position {} in session {}";
     public static final String DROPPED_ITEM = "Item {} was dropper at position {} in session {}";
+
+    public static final String TARGET_LEFT_SESSION = "Target left the session.";
+    public static final String KILL_PLAYER_THREAD = "Player Thread is killed";
+
+    public static final String PLAYER_IS_DEFENDING = "Player {} is defending";
+
+    public static final String MAYBE_LEFT_SESSION = "Cannot attack: target is null (maybe left session).";
+    public static final String TARGET_KILLED = "{} has been killed by {}";
 }

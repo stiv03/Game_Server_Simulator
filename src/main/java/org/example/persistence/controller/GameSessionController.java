@@ -1,10 +1,10 @@
 package org.example.persistence.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.game.model.Entity;
-import org.example.persistence.dto.GameSessionDto;
-import org.example.persistence.dto.request.CreateGameSessionRequestDto;
-import org.example.persistence.mapper.GameSessionMapper;
+import org.example.dto.gameDto.EntityDto;
+import org.example.dto.GameSessionDto;
+import org.example.dto.request.CreateGameSessionRequestDto;
+import org.example.mapper.GameSessionMapper;
 import org.example.persistence.entity.Users;
 import org.example.persistence.repository.UsersRepository;
 import org.example.persistence.service.GameSessionService;
@@ -36,33 +36,25 @@ public class GameSessionController {
 
     @PostMapping(ApiRoutes.GameSessionApiRoutes.JOIN)
     public ResponseEntity<GameSessionDto> joinSession(@PathVariable UUID id, @RequestParam UUID userId) {
-        Optional<Users> user = usersRepository.findById(userId);
-        return user.map(users -> gameSessionService.joinSession(id, users).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build())).orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(gameSessionService.joinSession(id, userId));
 
     }
 
     @GetMapping(ApiRoutes.GameSessionApiRoutes.BY_ID)
     public ResponseEntity<GameSessionDto> getById(@PathVariable UUID id) {
-        return gameSessionService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(gameSessionService.findById(id));
     }
 
 
     @GetMapping(ApiRoutes.GameSessionApiRoutes.RUNNING)
     public ResponseEntity<List<GameSessionDto>> getAllRunningSessions() {
-        List<GameSessionDto> sessions = gameSessionService.findAllRunningSessions().stream().toList();
-
+        List<GameSessionDto> sessions = gameSessionService.findAllRunningSessions();
         return ResponseEntity.ok(sessions);
     }
 
     @PostMapping(ApiRoutes.GameSessionApiRoutes.LEAVE)
     public ResponseEntity<GameSessionDto> leaveSession(@PathVariable UUID id, @RequestParam UUID userId) {
-        Optional<Users> user = usersRepository.findById(userId);
-        return user
-                .flatMap(u -> gameSessionService.leaveSession(id, u)
-                        .map(session -> ResponseEntity.ok(GameSessionMapper.toGameSessionDto(session))))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok( gameSessionService.leaveSession(id, userId));
     }
 
     @PostMapping(ApiRoutes.GameSessionApiRoutes.STOP)
@@ -72,7 +64,7 @@ public class GameSessionController {
     }
 
     @GetMapping(ApiRoutes.GameSessionApiRoutes.RANKING)
-    public ResponseEntity<List<Entity>> getRanking(@PathVariable UUID id) {
+    public ResponseEntity<List<EntityDto>> getRanking(@PathVariable UUID id) {
         return ResponseEntity.ok(gameSessionService.getRanking(id));
     }
 }

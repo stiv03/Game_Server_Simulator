@@ -21,14 +21,16 @@ public class Damage {
     }
 
     public void handleDamage(Entity target, int amount) {
-        if (!target.isAlive()) return;
+        synchronized (target) {
+            if (!target.isAlive()) return;
 
-        if (target instanceof Player player) {
-            if (player.isInvincible()) return;
-            applyDamageDirectly(player, amount);
+            if (target instanceof Player player) {
+                if (player.isInvincible()) return;
+                applyDamageDirectly(player, amount);
 
-        } else if (target instanceof Npc npc) {
-            applyDamageDirectly(npc, amount);
+            } else if (target instanceof Npc npc) {
+                applyDamageDirectly(npc, amount);
+            }
         }
     }
 

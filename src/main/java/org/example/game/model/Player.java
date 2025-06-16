@@ -1,8 +1,10 @@
 package org.example.game.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.config.messages.LogMessages;
 import org.example.game.commands.Command;
 import org.example.persistence.entity.GameSession;
 import org.example.persistence.entity.Users;
@@ -21,13 +23,11 @@ public class Player implements Entity, Runnable {
 
     private static final int MAX_HEALTH = 100;
 
-    private Users user;
-    private Position position;
-
     private final GameSession session;
 
+    private Users user;
+    private Position position;
     private int health = MAX_HEALTH;
-
     private int xp;
     private boolean idDead;
     private boolean defending;
@@ -38,9 +38,11 @@ public class Player implements Entity, Runnable {
     private long doubleDamageEndTime = 0;
     private long invincibilityEndTime = 0;
     private long speedBoostEndTime = 0;
+    private long defendingEndTime;
 
     private volatile boolean running = true;
 
+    @JsonIgnore
     private final BlockingQueue<Command> commandQueue = new LinkedBlockingQueue<>();
 
     public Player(Users user, Position position, GameSession session) {
@@ -74,7 +76,7 @@ public class Player implements Entity, Runnable {
                 System.err.println(e.getMessage());
             }
         }
-        logger.info("USER Thread is killleddddd");
+        logger.info(LogMessages.KILL_PLAYER_THREAD);
     }
 
     @Override
