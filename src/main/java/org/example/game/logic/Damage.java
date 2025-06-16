@@ -34,7 +34,6 @@ public class Damage {
         }
     }
 
-
     private void applyDamageDirectly(Player player, int amount) {
         int newHealth = player.getHealth() - amount;
         player.setHealth(Math.max(newHealth, 0));

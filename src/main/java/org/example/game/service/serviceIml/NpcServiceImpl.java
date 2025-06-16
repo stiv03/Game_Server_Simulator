@@ -84,7 +84,7 @@ public class NpcServiceImpl implements NpcService {
     }
 
     @Override
-    public void attack(UUID npcId, UUID targetId) throws InterruptedException {
+    public void attack(UUID npcId, UUID targetId) {
         Npc npc = getNpc(npcId);
 
         GameSessionContext context = gameSessionManager.getContext(npc.getSession().getId());

@@ -1,4 +1,4 @@
-package org.example.persistence.dto;
+package org.example.dto;
 
 import java.util.Set;
 import java.util.UUID;

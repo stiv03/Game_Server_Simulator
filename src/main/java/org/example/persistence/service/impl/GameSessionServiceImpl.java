@@ -2,23 +2,24 @@ package org.example.persistence.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.game.gameDto.EntityDto;
+import org.example.dto.gameDto.EntityDto;
+import org.example.exceptions.SessionNotFoundException;
+import org.example.exceptions.UserNotFoundException;
 import org.example.game.logic.gameSession.GameSessionManager;
 import org.example.game.model.Player;
 import org.example.game.service.PlayerService;
-import org.example.persistence.dto.GameSessionDto;
-import org.example.persistence.dto.request.CreateGameSessionRequestDto;
-import org.example.persistence.mapper.GameSessionMapper;
+import org.example.dto.GameSessionDto;
+import org.example.dto.request.CreateGameSessionRequestDto;
+import org.example.mapper.GameSessionMapper;
 import org.example.persistence.entity.GameSession;
 import org.example.persistence.entity.Users;
 import org.example.persistence.repository.GameSessionRepository;
+import org.example.persistence.repository.UsersRepository;
 import org.example.persistence.service.GameSessionService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,10 +28,9 @@ import java.util.stream.Collectors;
 public class GameSessionServiceImpl implements GameSessionService {
 
     private final GameSessionRepository gameSessionRepository;
+    private final UsersRepository usersRepository;
     private final PlayerService playerService;
-
-    @Autowired
-    private GameSessionManager sessionManager;
+    private final GameSessionManager sessionManager;
 
     @Override
     @Transactional
@@ -41,7 +41,7 @@ public class GameSessionServiceImpl implements GameSessionService {
 
         sessionManager.startSession(saved);
 
-        joinSession(session.getId(),session.getCreatedBy());
+        joinSession(session.getId(), session.getCreatedBy().getId());
 
         return GameSessionMapper.toGameSessionDto(saved);
     }
@@ -66,64 +66,53 @@ public class GameSessionServiceImpl implements GameSessionService {
     }
 
     @Override
-    public Optional<GameSessionDto> findById(UUID id) {
+    public GameSessionDto findById(UUID id) {
         return gameSessionRepository.findById(id)
-                .map(GameSessionMapper::toGameSessionDto);
+                .map(GameSessionMapper::toGameSessionDto).orElseThrow(SessionNotFoundException::new);
     }
 
     @Override
     @Transactional
-    public Optional<GameSessionDto> joinSession(UUID sessionId, Users user) {
-        Optional<GameSession> optionalSession = gameSessionRepository.findById(sessionId);
-
-        if (optionalSession.isEmpty()) {
-            return Optional.empty();
-        }
+    public GameSessionDto joinSession(UUID sessionId, UUID userId) {
+        GameSession session = gameSessionRepository.findById(sessionId).orElseThrow(SessionNotFoundException::new);
+        Users user = usersRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
         leaveActiveSession(sessionId, user);
-
-        GameSession session = optionalSession.get();
 
         Player player = playerService.registerPlayer(user, session);
         sessionManager.getContext(sessionId).joinPlayer(player);
 
-        if (session.getEndTime() != null) {
-            return Optional.empty();
-        }
-
         session.getParticipants().add(user);
         gameSessionRepository.update(session);
 
-        return Optional.of(GameSessionMapper.toGameSessionDto(session));
+        return GameSessionMapper.toGameSessionDto(session);
     }
 
     @Override
     @Transactional
-    public Optional<GameSession> leaveSession(UUID sessionId, Users user) {
-        Optional<GameSession> optionalSession = gameSessionRepository.findById(sessionId);
-
-        if (optionalSession.isEmpty()) return Optional.empty();
-
-        GameSession session = optionalSession.get();
+    public GameSessionDto leaveSession(UUID sessionId,  UUID userId) {
+        GameSession session = gameSessionRepository.findById(sessionId).orElseThrow(SessionNotFoundException::new);
+        Users user = usersRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
         sessionManager.getOrLoadContext(sessionId).removePlayer(user.getId());
 
         session.getParticipants().remove(user);
-        return Optional.of(gameSessionRepository.update(session));
+        return GameSessionMapper.toGameSessionDto(gameSessionRepository.update(session));
     }
 
     @Override
     public List<EntityDto> getRanking(UUID sessionId) {
-        return  sessionManager.getOrLoadContext(sessionId).getRanking().stream()
-                .map(entity -> new EntityDto(entity.getName())) .toList();
+        return sessionManager.getOrLoadContext(sessionId).getRanking().stream()
+                .map(entity -> new EntityDto(entity.getName())).toList();
     }
+
 
     private void leaveActiveSession(UUID sessionId, Users user) {
         List<GameSession> activeSessions = gameSessionRepository.findAllRunning();
 
         for (GameSession active : activeSessions) {
             if (!active.getId().equals(sessionId) && active.getParticipants().contains(user)) {
-                leaveSession(active.getId(), user);
+                leaveSession(active.getId(), user.getId());
                 gameSessionRepository.update(active);
             }
         }

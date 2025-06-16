@@ -1,5 +1,6 @@
 package org.example.game.logic;
 
+import org.example.config.messages.LogMessages;
 import org.example.exceptions.UnknownEntityType;
 import org.example.game.logic.helpers.Distance;
 import org.example.game.model.Entity;
@@ -38,17 +39,17 @@ public class Attack {
     }
 
 
-    public void hitTarget(Entity attacker, Entity target) throws InterruptedException {
+    public void hitTarget(Entity attacker, Entity target) {
 
         if (target == null) {
-            logger.warn("Cannot attack: target is null.");
+            logger.warn(LogMessages.MAYBE_LEFT_SESSION);
             return;
         }
 
         synchronized (target) {
 
             if (!target.isAlive()){
-                logger.info("{} has been killed by {}", target.getName(), attacker.getName());
+                logger.info(LogMessages.TARGET_KILLED, target.getName(), attacker.getName());
             }
 
             int damage = resolveDamage(attacker, target);

@@ -7,8 +7,6 @@ import org.example.game.enums.NpcType;
 import org.example.game.commands.Command;
 import org.example.game.logic.npcAutomations.NpcAiEngine;
 import org.example.persistence.entity.GameSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 import java.util.UUID;
@@ -17,9 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 @Getter
 @Setter
-public class Npc implements Entity,Runnable {
-
-    private static final Logger logger = LoggerFactory.getLogger(Npc.class);
+public class Npc implements Entity, Runnable {
 
     private static final int MAX_NPC_HEALTH = 50;
 
@@ -28,8 +24,6 @@ public class Npc implements Entity,Runnable {
     private final UUID id = UUID.randomUUID();
     private final String name;
     private final NpcType type;
-    private boolean idDead;
-
     private Position position;
     private int health = MAX_NPC_HEALTH;
     private boolean defending = false;
@@ -43,7 +37,7 @@ public class Npc implements Entity,Runnable {
     private final BlockingQueue<Command> commandQueue = new LinkedBlockingQueue<>();
 
 
-    public Npc(NpcType type, Position position, GameSession session,NpcAiEngine npcAiEngine) {
+    public Npc(NpcType type, Position position, GameSession session, NpcAiEngine npcAiEngine) {
         this.type = type;
         this.position = position;
         this.name = type.toString().toLowerCase() + id;

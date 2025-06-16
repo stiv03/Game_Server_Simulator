@@ -23,13 +23,11 @@ public class Player implements Entity, Runnable {
 
     private static final int MAX_HEALTH = 100;
 
-    private Users user;
-    private Position position;
-
     private final GameSession session;
 
+    private Users user;
+    private Position position;
     private int health = MAX_HEALTH;
-
     private int xp;
     private boolean idDead;
     private boolean defending;
@@ -40,11 +38,10 @@ public class Player implements Entity, Runnable {
     private long doubleDamageEndTime = 0;
     private long invincibilityEndTime = 0;
     private long speedBoostEndTime = 0;
-
     private long defendingEndTime;
 
-
     private volatile boolean running = true;
+
     @JsonIgnore
     private final BlockingQueue<Command> commandQueue = new LinkedBlockingQueue<>();
 

@@ -1,4 +1,4 @@
-package org.example.game.gameDto;
+package org.example.dto.gameDto;
 
 import java.util.UUID;
 

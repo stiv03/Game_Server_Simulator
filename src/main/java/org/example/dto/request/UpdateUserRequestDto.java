@@ -1,4 +1,4 @@
-package org.example.persistence.dto.request;
+package org.example.dto.request;
 
 public record UpdateUserRequestDto(String email, String username, String password) {
 }

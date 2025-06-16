@@ -50,7 +50,9 @@ public class LogMessages {
 
     public static final String TARGET_LEFT_SESSION = "Target left the session.";
     public static final String KILL_PLAYER_THREAD = "Player Thread is killed";
-    public static final String KILL_NPC_THREAD = "NPC Thread is killed";
 
     public static final String PLAYER_IS_DEFENDING = "Player {} is defending";
+
+    public static final String MAYBE_LEFT_SESSION = "Cannot attack: target is null (maybe left session).";
+    public static final String TARGET_KILLED = "{} has been killed by {}";
 }

@@ -1,7 +1,7 @@
 package org.example.game.controller;
 
 import org.example.game.enums.Direction;
-import org.example.game.gameDto.AttackRequest;
+import org.example.dto.gameDto.AttackRequest;
 import org.example.game.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;

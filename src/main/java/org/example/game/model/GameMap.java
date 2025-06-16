@@ -81,18 +81,6 @@ public class GameMap {
         return pos.getX() > 0 && pos.getX() < WIDTH - 1 && pos.getY() > 0 && pos.getY() < HEIGHT - 1;
     }
 
-    public Tile getTile(int x, int y) {
-        if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
-            return tiles[y][x];
-        }
-        return Tile.WALL;
-    }
-
-    public void setTile(int x, int y, Tile tile) {
-        if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
-            tiles[y][x] = tile;
-        }
-    }
 
     public Position getRandomEmptyPosition() {
         while (true) {
@@ -104,16 +92,4 @@ public class GameMap {
         }
     }
 
-    public void printToConsole() {
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                if (tiles[y][x] == Tile.WALL) {
-                    System.out.print("#");
-                } else {
-                    System.out.print(" ");
-                }
-            }
-            System.out.println();
-        }
-    }
 }

@@ -89,7 +89,6 @@ public class GameSessionContext implements Runnable {
     }
 
 
-
     public void joinPlayer(Player player) {
         entities.put(player.getId(), player);
         logger.info(LogMessages.PLAYER_JOIN, player.getName(), session.getId(), player.getPosition().toString());
@@ -102,8 +101,8 @@ public class GameSessionContext implements Runnable {
 
         logger.info(LogMessages.RANKING, session.getId());
         for (int i = 0; i < sortedRanking.size(); i++) {
-            Entity e = sortedRanking.get(i);
-            logger.info(LogMessages.ENTITY_RANKING, i + 1, e.getName(), e.getHealth());
+            Entity entity = sortedRanking.get(i);
+            logger.info(LogMessages.ENTITY_RANKING, i + 1, entity.getName(), entity.getHealth());
         }
 
         return sortedRanking;

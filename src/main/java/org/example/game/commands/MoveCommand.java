@@ -23,7 +23,6 @@ public class MoveCommand implements Command {
         this.direction = direction;
         this.gameSessionContext = context;
         this.steps = steps;
-
     }
 
     @Override
@@ -38,5 +37,4 @@ public class MoveCommand implements Command {
             }
         }
     }
-
 }

@@ -1,9 +1,9 @@
-package org.example.persistence.mapper;
+package org.example.mapper;
 
 
 import org.example.config.messages.LogMessages;
-import org.example.persistence.dto.request.RegisterUserRequestDto;
-import org.example.persistence.dto.UserDto;
+import org.example.dto.request.RegisterUserRequestDto;
+import org.example.dto.UserDto;
 
 
 import org.example.exceptions.ErrorMessages;

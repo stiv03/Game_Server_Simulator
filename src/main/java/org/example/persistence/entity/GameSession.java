@@ -57,5 +57,4 @@ public class GameSession {
 
     @Transient
     private GameMap gameMap = new GameMap();
-
 }

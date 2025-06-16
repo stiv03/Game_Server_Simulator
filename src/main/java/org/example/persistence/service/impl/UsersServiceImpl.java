@@ -1,12 +1,12 @@
 package org.example.persistence.service.impl;
 
 import org.example.config.messages.LogMessages;
-import org.example.persistence.dto.request.RegisterUserRequestDto;
-import org.example.persistence.dto.request.UpdateUserRequestDto;
-import org.example.persistence.dto.UserDto;
+import org.example.dto.request.RegisterUserRequestDto;
+import org.example.dto.request.UpdateUserRequestDto;
+import org.example.dto.UserDto;
 import org.example.exceptions.UserAlreadyExistsException;
 import org.example.exceptions.UserNotFoundException;
-import org.example.persistence.mapper.UserMapper;
+import org.example.mapper.UserMapper;
 import org.example.persistence.entity.Users;
 import org.example.persistence.repository.UsersRepository;
 import org.example.persistence.service.UsersService;

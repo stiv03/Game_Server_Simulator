@@ -14,9 +14,9 @@ public interface PlayerService extends EntityService {
 
     Player registerPlayer(Users user, GameSession session);
 
-    void move(UUID playerId, Direction direction) throws InterruptedException;
+    void move(UUID playerId, Direction direction);
 
-    void attack(UUID attackerId, UUID targetId) throws InterruptedException;
+    void attack(UUID attackerId, UUID targetId);
 
     void defend(UUID playerId);
 

@@ -11,9 +11,9 @@ public interface NpcService extends EntityService{
 
     Npc spawnNpc(GameSession session);
 
-    void move(UUID npcId, Direction direction) throws InterruptedException;
+    void move(UUID npcId, Direction direction);
 
-    void attack(UUID npcId, UUID targetId) throws InterruptedException;
+    void attack(UUID npcId, UUID targetId);
 
     void defend(UUID npcId);
 

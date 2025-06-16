@@ -28,12 +28,11 @@ public class AttackCommand implements Command {
         Entity target = context.getEntitiesMap().get(targetId);
 
         if (target == null) {
-            logger.warn("Cannot attack: target is null (maybe left session).");
+            logger.warn(LogMessages.MAYBE_LEFT_SESSION);
             return;
         }
-
         attackService.hitTarget(attacker, target);
-        logger.info("{} attacked {}", attacker.getName(), target.getName());
+        logger.info(LogMessages.ATTACK_LOG, attacker.getName(), target.getName());
     }
 }
 

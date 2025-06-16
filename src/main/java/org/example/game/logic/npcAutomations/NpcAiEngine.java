@@ -16,7 +16,7 @@ public class NpcAiEngine {
     }
 
     public void automaticAct(Npc npc) throws InterruptedException {
-        Thread.sleep(10000);
+        Thread.sleep(5000);
         npcMove.moveNpc(npc, playerService.getAllPlayers());
         npcAttack.tryAttack(npc, playerService.getAllPlayers());
     }
