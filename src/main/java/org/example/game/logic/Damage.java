@@ -21,7 +21,7 @@ public class Damage {
     }
 
     public void handleDamage(Entity target, int amount) {
-        synchronized (target) {
+        synchronized (target.getLock()) {
             if (!target.isAlive()) return;
 
             if (target instanceof Player player) {

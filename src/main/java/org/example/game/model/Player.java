@@ -43,6 +43,9 @@ public class Player implements Entity, Runnable {
     private volatile boolean running = true;
 
     @JsonIgnore
+    private final Object lock = new Object();
+
+    @JsonIgnore
     private final BlockingQueue<Command> commandQueue = new LinkedBlockingQueue<>();
 
     public Player(Users user, Position position, GameSession session) {

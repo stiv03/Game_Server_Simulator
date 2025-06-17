@@ -76,11 +76,8 @@ public class NpcServiceImpl implements NpcService {
     @Override
     public void move(UUID npcId, Direction direction) {
         Npc npc = getNpc(npcId);
-        synchronized (npc) {
-
-            GameSessionContext context = gameSessionManager.getContext(npc.getSession().getId());
-            npc.getCommandQueue().add(new MoveCommand(direction, context, NORMAL_STEP));
-        }
+        GameSessionContext context = gameSessionManager.getContext(npc.getSession().getId());
+        npc.getCommandQueue().add(new MoveCommand(direction, context, NORMAL_STEP));
     }
 
     @Override

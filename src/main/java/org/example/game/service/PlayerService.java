@@ -27,4 +27,13 @@ public interface PlayerService extends EntityService {
     void onDeath(UUID playerId);
 
     Collection<Player> getAllPlayers();
+
+    void applyHealthRecovery(Player player, int amount, int maxHealth);
+
+    void applyDoubleDamage(Player player, long durationMillis);
+
+    void applyInvincibility(Player player, long durationMillis);
+
+    void applySpeedBoost(Player player, long durationMillis);
+
 }
