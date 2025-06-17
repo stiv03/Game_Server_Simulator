@@ -34,6 +34,9 @@ public class Npc implements Entity, Runnable {
     private final NpcAiEngine npcAiEngine;
 
     @JsonIgnore
+    private final Object lock = new Object();
+
+    @JsonIgnore
     private final BlockingQueue<Command> commandQueue = new LinkedBlockingQueue<>();
 
 

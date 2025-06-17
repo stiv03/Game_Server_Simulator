@@ -134,6 +134,37 @@ public class PlayerServiceImpl implements PlayerService {
         player.disconnect();
     }
 
+    @Override
+    public void applyHealthRecovery(Player player, int amount, int maxHealth) {
+        synchronized (player.getLock()) {
+            player.setHealth(Math.min(maxHealth, player.getHealth() + amount));
+        }
+    }
+
+    @Override
+    public void applyDoubleDamage(Player player, long durationMillis) {
+        synchronized (player.getLock()) {
+            player.setDoubleDamage(true);
+            player.setDoubleDamageEndTime(System.currentTimeMillis() + durationMillis);
+        }
+    }
+
+    @Override
+    public void applyInvincibility(Player player, long durationMillis) {
+        synchronized (player.getLock()) {
+            player.setInvincible(true);
+            player.setInvincibilityEndTime(System.currentTimeMillis() + durationMillis);
+        }
+    }
+
+    @Override
+    public void applySpeedBoost(Player player, long durationMillis) {
+        synchronized (player.getLock()) {
+            player.setSpeedBoost(true);
+            player.setSpeedBoostEndTime(System.currentTimeMillis() + durationMillis);
+        }
+    }
+
     private void levelUp(Player player) {
         usersService.levelUpUser(player.getUser().getId());
         player.setXp(0);

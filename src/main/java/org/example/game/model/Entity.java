@@ -22,5 +22,7 @@ public interface Entity {
     boolean isDefending();
 
     void disconnect();
+
+    Object getLock();
 }
 

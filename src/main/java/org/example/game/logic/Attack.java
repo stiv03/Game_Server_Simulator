@@ -46,7 +46,7 @@ public class Attack {
             return;
         }
 
-        synchronized (target) {
+        synchronized (target.getLock()) {
 
             if (!target.isAlive()){
                 logger.info(LogMessages.TARGET_KILLED, target.getName(), attacker.getName());
@@ -69,7 +69,6 @@ public class Attack {
         }
     }
 
-
     private static int resolveDamage(Entity attacker, Entity target) {
         if (attacker instanceof Npc npc) {
             return calculateNpcDamage(npc, target);
@@ -81,7 +80,6 @@ public class Attack {
             throw new UnknownEntityType(attacker.getClass().getSimpleName());
         }
     }
-
 
     private static int calculatePlayerDamage(Player attacker, Entity target) {
         int level = attacker.getUser().getLevel();
@@ -96,7 +94,6 @@ public class Attack {
 
         return damage;
     }
-
 
     private static int calculateNpcDamage(Npc attacker, Entity target) {
         int maxRange = switch (attacker.getType()) {
@@ -118,7 +115,6 @@ public class Attack {
         return (int) (baseDamage * distanceFactor);
     }
 
-
     private static int applyDefenseReduction(Entity target, int damage) {
         if (target instanceof Player player) {
             if (player.isDefending() && player.getDefendingEndTime() > System.currentTimeMillis()) {
@@ -129,7 +125,6 @@ public class Attack {
         }
         return damage;
     }
-
 
     private static double calculateDistanceFactor(int distance) {
         return Math.max(1.0 - (distance * 0.1), 0.5);

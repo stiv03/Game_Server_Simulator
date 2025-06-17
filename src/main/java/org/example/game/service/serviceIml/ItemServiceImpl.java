@@ -7,6 +7,7 @@ import org.example.game.model.Item;
 import org.example.game.model.Player;
 import org.example.game.model.Position;
 import org.example.game.service.ItemService;
+import org.example.game.service.PlayerService;
 import org.example.persistence.entity.GameSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,13 @@ public class ItemServiceImpl implements ItemService {
     private static final int MAX_HEALTH = 100;
     private static final int EFFECT_DURATION_MILLIS = 30_000;
 
+    private final PlayerService playerService;
+
+    public ItemServiceImpl(PlayerService playerService) {
+        this.playerService = playerService;
+    }
+
+
     public Item spawnItemsForSession(GameSession session) {
         GameMap map = session.getGameMap();
         Position droppedAtPosition = map.getRandomEmptyPosition();
@@ -32,41 +40,35 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void applyEffect(Item item, Player player) {
-        synchronized (item) {
-            if (item.isConsumed() || !player.getPosition().equals(item.getPosition())) return;
+        if (!player.getPosition().equals(item.getPosition())) return;
+        if (!item.consume()) return;
 
-            logger.info(LogMessages.LOG_ITEM_PICKED, player.getName(), item.getEffect(),
-                    item.getPosition().getX(), item.getPosition().getY());
+        logger.info(LogMessages.LOG_ITEM_PICKED, player.getName(), item.getEffect(),
+                item.getPosition().getX(), item.getPosition().getY());
 
-            synchronized (player) {
-                switch (item.getEffect()) {
-                    case HEALTH_RECOVERY -> {
-                        player.setHealth(Math.min(MAX_HEALTH, player.getHealth() + HEALTH_RECOVERY_POINTS));
-                        logger.info(LogMessages.LOG_HEALTH_RECOVERY, player.getName());
-                    }
-                    case DOUBLE_DAMAGE -> {
-                        player.setDoubleDamage(true);
-                        player.setDoubleDamageEndTime(System.currentTimeMillis() + EFFECT_DURATION_MILLIS);
-                        logger.info(LogMessages.LOG_DOUBLE_DAMAGE, player.getName());
-                    }
-                    case INVINCIBILITY -> {
-                        player.setInvincible(true);
-                        player.setInvincibilityEndTime(System.currentTimeMillis() + EFFECT_DURATION_MILLIS);
-                        logger.info(LogMessages.LOG_INVINCIBILITY, player.getName());
-                    }
-                    case SPEED_BOOST -> {
-                        player.setSpeedBoost(true);
-                        player.setSpeedBoostEndTime(System.currentTimeMillis() + EFFECT_DURATION_MILLIS);
-                        logger.info(LogMessages.LOG_SPEED_BOOST, player.getName());
-                    }
-                }
+        switch (item.getEffect()) {
+            case HEALTH_RECOVERY -> {
+                playerService.applyHealthRecovery(player, HEALTH_RECOVERY_POINTS, MAX_HEALTH);
+                logger.info(LogMessages.LOG_HEALTH_RECOVERY, player.getName());
             }
-
-            item.setConsumed(true);
-            logger.debug(LogMessages.LOG_ITEM_CONSUMED,
-                    item.getPosition().getX(), item.getPosition().getY());
+            case DOUBLE_DAMAGE -> {
+                playerService.applyDoubleDamage(player, EFFECT_DURATION_MILLIS);
+                logger.info(LogMessages.LOG_DOUBLE_DAMAGE, player.getName());
+            }
+            case INVINCIBILITY -> {
+                playerService.applyInvincibility(player, EFFECT_DURATION_MILLIS);
+                logger.info(LogMessages.LOG_INVINCIBILITY, player.getName());
+            }
+            case SPEED_BOOST -> {
+                playerService.applySpeedBoost(player, EFFECT_DURATION_MILLIS);
+                logger.info(LogMessages.LOG_SPEED_BOOST, player.getName());
+            }
         }
+
+        logger.debug(LogMessages.LOG_ITEM_CONSUMED,
+                item.getPosition().getX(), item.getPosition().getY());
     }
+
 
     private Effect randomEffect() {
         Effect[] effects = Effect.values();

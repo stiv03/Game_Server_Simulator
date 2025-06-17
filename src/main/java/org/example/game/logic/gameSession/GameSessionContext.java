@@ -132,7 +132,6 @@ public class GameSessionContext implements Runnable {
             for (Item item : items) {
                 if (!item.isConsumed() && item.getPosition().equals(player.getPosition())) {
                     itemService.applyEffect(item, player);
-                    item.setConsumed(true);
                 }
             }
         }
