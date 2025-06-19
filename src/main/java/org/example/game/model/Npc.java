@@ -3,6 +3,7 @@ package org.example.game.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.config.lock.LockManager;
 import org.example.game.enums.NpcType;
 import org.example.game.commands.Command;
 import org.example.game.logic.npcAutomations.NpcAiEngine;
@@ -32,9 +33,6 @@ public class Npc implements Entity, Runnable {
 
     @JsonIgnore
     private final NpcAiEngine npcAiEngine;
-
-    @JsonIgnore
-    private final Object lock = new Object();
 
     @JsonIgnore
     private final BlockingQueue<Command> commandQueue = new LinkedBlockingQueue<>();
@@ -76,6 +74,11 @@ public class Npc implements Entity, Runnable {
         this.running = false;
         commandQueue.offer(command -> {
         });
+    }
+
+
+    public Object getLock() {
+        return LockManager.getLock(getId());
     }
 }
 

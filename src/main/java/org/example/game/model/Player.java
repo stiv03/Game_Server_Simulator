@@ -4,6 +4,7 @@ package org.example.game.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.config.lock.LockManager;
 import org.example.config.messages.LogMessages;
 import org.example.game.commands.Command;
 import org.example.persistence.entity.GameSession;
@@ -41,9 +42,6 @@ public class Player implements Entity, Runnable {
     private long defendingEndTime;
 
     private volatile boolean running = true;
-
-    @JsonIgnore
-    private final Object lock = new Object();
 
     @JsonIgnore
     private final BlockingQueue<Command> commandQueue = new LinkedBlockingQueue<>();
@@ -87,5 +85,9 @@ public class Player implements Entity, Runnable {
         this.running = false;
         commandQueue.offer(command -> {
         });
+    }
+
+    public Object getLock() {
+        return LockManager.getLock(getId());
     }
 }

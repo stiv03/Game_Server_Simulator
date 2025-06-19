@@ -50,6 +50,7 @@ public class Attack {
 
             if (!target.isAlive()){
                 logger.info(LogMessages.TARGET_KILLED, target.getName(), attacker.getName());
+                return;
             }
 
             int damage = resolveDamage(attacker, target);
