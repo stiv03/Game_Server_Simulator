@@ -41,18 +41,16 @@ public class PlayerServiceImpl implements PlayerService {
     private final UsersService usersService;
     private final Attack attack;
     private final Damage damage;
+    private final GameSessionManager gameSessionManager;
 
     private final Map<UUID, Player> players = new ConcurrentHashMap<>();
 
-
     @Autowired
-    private GameSessionManager gameSessionManager;
-
-    @Autowired
-    public PlayerServiceImpl(UsersService usersService, @Lazy Attack attack, @Lazy Damage damage) {
+    public PlayerServiceImpl(UsersService usersService, @Lazy Attack attack, @Lazy Damage damage,GameSessionManager gameSessionManager) {
         this.usersService = usersService;
         this.attack = attack;
         this.damage = damage;
+        this.gameSessionManager = gameSessionManager;
     }
 
     @Override

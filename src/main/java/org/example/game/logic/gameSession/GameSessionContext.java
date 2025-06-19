@@ -33,13 +33,13 @@ public class GameSessionContext implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(GameSessionContext.class);
 
-    private static final int EASY_NPC_COUNT = 1;
-    private static final int NORMAL_NPC_COUNT = 2;
-    private static final int HARD_NPC_COUNT = 5;
+    private static final int EASY_NPC_COUNT = 100;
+    private static final int NORMAL_NPC_COUNT = 150;
+    private static final int HARD_NPC_COUNT = 300;
 
-    private static final int EASY_ITEM_COUNT = 20;
-    private static final int NORMAL_ITEM_COUNT = 10;
-    private static final int HARD_ITEM_COUNT = 5;
+    private static final int EASY_ITEM_COUNT = 200;
+    private static final int NORMAL_ITEM_COUNT = 100;
+    private static final int HARD_ITEM_COUNT = 50;
 
     private GameSession session;
 

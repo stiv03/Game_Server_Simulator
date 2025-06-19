@@ -1,5 +1,6 @@
 package org.example.game.service.serviceIml;
 
+import org.example.config.lock.LockManager;
 import org.example.config.messages.LogMessages;
 import org.example.game.enums.Effect;
 import org.example.game.model.GameMap;
@@ -67,6 +68,7 @@ public class ItemServiceImpl implements ItemService {
 
         logger.debug(LogMessages.LOG_ITEM_CONSUMED,
                 item.getPosition().getX(), item.getPosition().getY());
+        LockManager.removeLock(item.getId());
     }
 
 

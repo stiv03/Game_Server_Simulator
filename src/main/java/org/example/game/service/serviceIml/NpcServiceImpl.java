@@ -1,5 +1,6 @@
 package org.example.game.service.serviceIml;
 
+import org.example.config.lock.LockManager;
 import org.example.config.messages.LogMessages;
 import org.example.game.enums.Direction;
 import org.example.game.enums.NpcType;
@@ -38,9 +39,7 @@ public class NpcServiceImpl implements NpcService {
     private static final Logger logger = LoggerFactory.getLogger(NpcServiceImpl.class);
     private static final int NORMAL_STEP = 1;
 
-    @Autowired
-    private GameSessionManager gameSessionManager;
-
+    private final GameSessionManager gameSessionManager;
     private final Attack attack;
     private final Damage damage;
     private final PlayerService playerService;
@@ -48,10 +47,11 @@ public class NpcServiceImpl implements NpcService {
     private final Map<UUID, Npc> npcs = new ConcurrentHashMap<>();
 
     @Autowired
-    public NpcServiceImpl(@Lazy Attack attack, @Lazy Damage damage, PlayerService playerService) {
+    public NpcServiceImpl(@Lazy Attack attack, @Lazy Damage damage, PlayerService playerService,GameSessionManager gameSessionManager) {
         this.attack = attack;
         this.damage = damage;
         this.playerService = playerService;
+        this.gameSessionManager = gameSessionManager;
     }
 
     @Override
@@ -114,6 +114,7 @@ public class NpcServiceImpl implements NpcService {
     public void onDeath(UUID npcId) {
         Npc npc = getNpc(npcId);
         npc.disconnect();
+        LockManager.removeLock(npcId);
     }
 
     @Override
